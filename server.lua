@@ -1,4 +1,5 @@
 local socket = require("socket")
+local inspect = require("inspect")
 
 function table.del(table, key)
   local element = table[key]
@@ -30,18 +31,20 @@ function Server:pinghandle()
   server sends client a ping if client fails to respond 10 times
   assumes as disconnected.
   ]]--
-  if self.connected.acc ~= nil then
-    for k,client in ipairs(self.connected) do
-      self.udp:sendto("ping", client.ip, client.port)
-      msg, ip, port = self.udp:receivefrom()
-      if msg ~= "pong" or not msg then
-        self.connected.acc = self.connected.acc + 1
-      end
-      if self.connected.acc == 10 then
+  for k,client in ipairs(self.connected) do
+    self.udp:sendto("ping", client.ip, client.port)
+    msg, ip, port = self.udp:receivefrom()
+
+    if msg ~= "pong" or not msg then
+      client.acc = client.acc + 1
+      if client.acc > 10 then
         print(string.format("%s:%d disconnected", client.ip, client.port))
         table.del(self.connected,k)
       end
+    else
+      client.acc = 0 -- reset if it gets pong back
     end
+
   end
 end
 
@@ -56,7 +59,6 @@ end
 
 function Server:start()
   while 1 do
-    self:pinghandle()
     msg, ip, port = self.udp:receivefrom()
     if msg then
       if msg == "join" then
@@ -66,6 +68,7 @@ function Server:start()
         self:broadcast(msg,ip,port)
       end
     end
+    self:pinghandle()
   end
 end
 

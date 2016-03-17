@@ -11,6 +11,7 @@ TODO:
 * Callback system for people to implement game-logic etc.
 * Channel support(50% done, pubsub.lua)
 * Redis pub/sub support
+* Support for multiple protocols at same time
 
 Broken:
 -------

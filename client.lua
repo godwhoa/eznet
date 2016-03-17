@@ -20,9 +20,20 @@ function Client:new(host,port)
   end
 end
 
-function Client:send(msg)
-	self.udp:send(msg)
+function Client:ponghandle()
+
 end
 
 local client = Client:new("localhost",8080)
-client:send("topkek")
+
+while 1 do
+  msg = client.udp:receive()
+  if msg == "ping" then
+    client.udp:send("pong")
+  end
+  line = io.read()
+  if not line or line == "" then os.exit() end
+  client.udp:send(line)
+  
+  print(msg)
+end
